@@ -45,14 +45,8 @@ Windows Phone 8
 ## 3. Installation
 
 ### Automatically (CLI / Plugman)
-Compatible with [Cordova Plugman](https://github.com/apache/cordova-plugman), compatible with [PhoneGap 3.0 CLI](http://docs.phonegap.com/en/3.0.0/guide_cli_index.md.html#The%20Command-line%20Interface_add_features), here's how it works with the CLI (backup your project first!):
-
 ```
-$ phonegap local plugin add https://github.com/EddyVerbruggen/cordova-plugin-actionsheet.git
-```
-or
-```
-$ cordova plugin add https://github.com/EddyVerbruggen/cordova-plugin-actionsheet
+$ cordova plugin add cordova-plugin-actionsheet
 $ cordova prepare
 ```
 
@@ -99,7 +93,7 @@ WP8: Copy `ActionSheet.cs` to `platforms/wp8/Plugins/nl.x-services.plugins.actio
 ### PhoneGap Build
 ActionSheet  works with PhoneGap build too! Just add the following xml to your `config.xml` to always use the latest version of this plugin:
 ```xml
-<gap:plugin name="nl.x-services.plugins.actionsheet" />
+<gap:plugin name="cordova-plugin-actionsheet" source="npm" />
 ```
 
 ActionSheet.js is brought in automatically. Make sure though you include a reference to cordova.js in your index.html's head:
@@ -108,6 +102,9 @@ ActionSheet.js is brought in automatically. Make sure though you include a refer
 ```
 
 ## 4. Usage
+
+### show
+
 Check the [demo code](demo) to get you going quickly,
 or copy-paste some of the code below to replicate the ActionSheets of the screenshots above.
 
@@ -121,12 +118,14 @@ or copy-paste some of the code below to replicate the ActionSheets of the screen
 
   function testShareSheet() {
     var options = {
+        'androidTheme': window.plugins.actionsheet.ANDROID_THEMES.THEME_HOLO_LIGHT, // default is THEME_TRADITIONAL
         'title': 'What do you want with this image?',
         'buttonLabels': ['Share via Facebook', 'Share via Twitter'],
         'androidEnableCancelButton' : true, // default false
         'winphoneEnableCancelButton' : true, // default false
         'addCancelButtonWithLabel': 'Cancel',
-        'addDestructiveButtonWithLabel' : 'Delete it'
+        'addDestructiveButtonWithLabel' : 'Delete it',
+        'position': [20, 40] // for iPad pass in the [x, y] position of the popover
     };
     // Depending on the buttonIndex, you can now call shareViaFacebook or shareViaTwitter
     // of the SocialSharing plugin (https://github.com/EddyVerbruggen/SocialSharing-PhoneGap-Plugin)
@@ -152,13 +151,30 @@ or copy-paste some of the code below to replicate the ActionSheets of the screen
   };
 ```
 
+On iOS, you can also position the actionSheet origin by adding `position: [100, 200]`
+
+### hide
+
+If for some reason you want to hide the actionsheet programmatically, do this:
+```js
+  // options and callbacks are optional, so either approach will work:
+  window.plugins.actionsheet.hide();
+  window.plugins.actionsheet.hide({}, onSuccess, onError);
+```
+
 ## 5. Credits
 iOS and WP8 code: [Eddy Verbruggen](https://github.com/EddyVerbruggen)
 
-Android code: [Brill Papping](https://github.com/bpappin)
+Android code: mostly [Brill Papping](https://github.com/bpappin)
 
 
-## 6. License
+## 6. Change history
+* 2.2.2 OK, 2.2.1 has issues with Russian and the like, so reverted. Pass in `Español` as `Espa\u00f1ol` please.
+* 2.2.1 Encoding of diacritical characters fixed on iOS, so you can now use `Español` as a title or button label.
+* 1.1.6 You can now set the iOS actionSheet origin position (uses the iOS `actionSheet.showFromRect` method)
+* 1.1.2 You can now select a theme for your Android popup, see the first example above
+
+## 7. License
 
 [The MIT License (MIT)](http://www.opensource.org/licenses/mit-license.html)
 

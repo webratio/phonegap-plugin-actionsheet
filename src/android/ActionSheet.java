@@ -3,6 +3,7 @@ package nl.xservices.plugins.actionsheet;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.os.Build;
 import android.text.TextUtils;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
@@ -21,6 +22,8 @@ import java.util.List;
  */
 public class ActionSheet extends CordovaPlugin {
 
+  private AlertDialog dialog;
+
   public ActionSheet() {
     super();
   }
@@ -31,6 +34,7 @@ public class ActionSheet extends CordovaPlugin {
       JSONObject options = args.optJSONObject(0);
 
       String title = options.optString("title");
+      int theme = options.optInt("androidTheme", 1);
       JSONArray buttons = options.optJSONArray("buttonLabels");
 
       boolean androidEnableCancelButton = options.optBoolean("androidEnableCancelButton", false);
@@ -40,8 +44,15 @@ public class ActionSheet extends CordovaPlugin {
 
       this.show(title, buttons, addCancelButtonWithLabel,
           androidEnableCancelButton, addDestructiveButtonWithLabel,
+          theme,
           callbackContext);
       // need to return as this call is async.
+      return true;
+    } else if ("hide".equals(action)) {
+      if (dialog != null && dialog.isShowing()) {
+        dialog.dismiss();
+        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, -1));
+      }
       return true;
     }
     return false;
@@ -52,6 +63,7 @@ public class ActionSheet extends CordovaPlugin {
                                 final String addCancelButtonWithLabel,
                                 final boolean androidEnableCancelButton,
                                 final String addDestructiveButtonWithLabel,
+                                final int theme,
                                 final CallbackContext callbackContext) {
 
     final CordovaInterface cordova = this.cordova;
@@ -59,7 +71,12 @@ public class ActionSheet extends CordovaPlugin {
     Runnable runnable = new Runnable() {
       public void run() {
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(cordova.getActivity());
+        final AlertDialog.Builder builder;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+          builder = new AlertDialog.Builder(cordova.getActivity(), theme);
+        } else {
+          builder = new AlertDialog.Builder(cordova.getActivity());
+        }
 
         builder
             .setTitle(title)
@@ -130,7 +147,8 @@ public class ActionSheet extends CordovaPlugin {
           }
         });
 
-        builder.create().show();
+        dialog = builder.create();
+        dialog.show();
       }
     };
     this.cordova.getActivity().runOnUiThread(runnable);
